@@ -1,7 +1,8 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import Background from "./components/common/background";
-import OnboardScreen from "./screens/Onboarding/Onboarding";
+import OnboardScreen from "./screens/OnboardScreen";
+import PrayerScreen from "./screens/PrayerScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -29,13 +30,14 @@ export default function App() {
                 <Background />
                 <NavigationContainer>
                     <Stack.Navigator
-                        initialRouteName="Onboarding"
+                        initialRouteName="Onboard"
                         screenOptions={{
                             headerShown: false, // removes the top bar
                             contentStyle: { backgroundColor: "#00000000" }, // sets the screen background
                         }}
                     >
-                        <Stack.Screen name="Onboarding" component={OnboardScreen} />
+                        <Stack.Screen name="Onboard" component={OnboardScreen} />
+                        <Stack.Screen name="Prayer" component={PrayerScreen} />
                     </Stack.Navigator>
                 </NavigationContainer>
             </View>
