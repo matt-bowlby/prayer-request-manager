@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
-import Background from "./components/common/background";
+import Background from "./components/common/Background";
 import OnboardScreen from "./screens/OnboardScreen";
 import PrayerScreen from "./screens/PrayerScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";

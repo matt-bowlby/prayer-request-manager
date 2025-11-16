@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
-import Button from "../components/screen/Button";
+import Button from "../components/common/Button";
 
 export default function OnboardScreen({ navigation }: any) {
     return (
