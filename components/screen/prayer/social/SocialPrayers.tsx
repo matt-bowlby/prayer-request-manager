@@ -7,7 +7,9 @@ export default function SocialPrayers({ prayers }: { prayers?: Prayer[] }) {
 
     return (
         <View style={styles.container}>
-            <Text>Social Prayers Component</Text>
+            <Text style={{ fontSize: 25, fontWeight: "bold", color: "white" }}>
+                Future home of the social prayers!
+            </Text>
         </View>
     );
 }

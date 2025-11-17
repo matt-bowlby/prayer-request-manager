@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import Background from "./components/common/Background";
 import OnboardScreen from "./screens/OnboardScreen";
 import PrayerScreen from "./screens/PrayerScreen";
+import CreateScreen from "./screens/CreateScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -30,7 +31,7 @@ export default function App() {
         addPrayer({
             id: "1",
             title: "Sample Prayer 1",
-            content: "This is the content of sample prayer 1.",
+            description: "This is the content of sample prayer 1.",
             tags: [],
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -38,7 +39,7 @@ export default function App() {
         addPrayer({
             id: "2",
             title: "Sample Prayer 2",
-            content: "This is the content of sample prayer 2.",
+            description: "This is the content of sample prayer 2.",
             tags: [],
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -46,7 +47,7 @@ export default function App() {
         addPrayer({
             id: "3",
             title: "Sample Prayer 3",
-            content: "This is the content of sample prayer 3.",
+            description: "This is the content of sample prayer 3.",
             tags: [],
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -72,6 +73,7 @@ export default function App() {
                     >
                         <Stack.Screen name="Onboard" component={OnboardScreen} />
                         <Stack.Screen name="Prayer" component={PrayerScreen} />
+                        <Stack.Screen name="Create" component={CreateScreen} />
                     </Stack.Navigator>
                 </NavigationContainer>
             </View>
