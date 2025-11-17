@@ -5,8 +5,8 @@ import Button from "../components/common/Button";
 
 export default function OnboardScreen({ navigation }: any) {
     return (
-        <SafeAreaView style={{ width: "100%", height: "100%" }}>
-            <View style={{ flex: 1, justifyContent: "space-between", alignItems: "center", marginHorizontal: 20, }}>
+        <SafeAreaView style={{ width: "100%", height: "100%", paddingHorizontal: 20, paddingTop: 10 }}>
+            <View style={{ flex: 1, justifyContent: "space-between", alignItems: "center"}}>
                 <View>
                     <Text style={styles.title}>Welcome to your personal</Text>
                     <Text style={styles.titleBold}>Prayer Request Manager</Text>
