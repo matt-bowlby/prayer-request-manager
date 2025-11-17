@@ -7,6 +7,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import { useEffect } from "react";
+
+import { usePrayerStore } from "./stores/PrayerStore";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +21,37 @@ export default function App() {
         Archivo_700: require("./assets/fonts/Archivo/Archivo-Bold.ttf"),
         Archivo_900: require("./assets/fonts/Archivo/Archivo-Black.ttf"),
     });
+
+    // Always call hooks at the top level
+    const addPrayer = usePrayerStore((state) => state.addPrayer);
+
+    useEffect(() => {
+        if (!fontsLoaded) return;
+        addPrayer({
+            id: "1",
+            title: "Sample Prayer 1",
+            content: "This is the content of sample prayer 1.",
+            tags: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+        addPrayer({
+            id: "2",
+            title: "Sample Prayer 2",
+            content: "This is the content of sample prayer 2.",
+            tags: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+        addPrayer({
+            id: "3",
+            title: "Sample Prayer 3",
+            content: "This is the content of sample prayer 3.",
+            tags: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+    }, [addPrayer, fontsLoaded]);
 
     if (!fontsLoaded) {
         return null;

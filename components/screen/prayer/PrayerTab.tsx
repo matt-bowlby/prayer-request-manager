@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
+import { usePrayerModeStore } from "../../../stores/PrayerModeStore";
 import Animated, {
     useSharedValue,
     withTiming,
@@ -8,19 +9,20 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function PrayerTab({ onPress }: { onPress?: (state: string) => void }) {
-    const [state, setState] = React.useState<"Personal" | "Social">("Personal");
+    let prayerMode = usePrayerModeStore((state) => state.mode);
+    let setPrayerMode = usePrayerModeStore((state) => state.setPrayerMode);
     const personalAnim = useSharedValue(1);
     const socialAnim = useSharedValue(0);
 
     useEffect(() => {
-        if (state === "Personal") {
+        if (prayerMode === "Personal") {
             personalAnim.value = withTiming(1, { duration: 200 });
             socialAnim.value = withTiming(0, { duration: 200 });
         } else {
             personalAnim.value = withTiming(0, { duration: 200 });
             socialAnim.value = withTiming(1, { duration: 200 });
         }
-    }, [state]);
+    }, [prayerMode]);
 
     const personalContainerStyle = useAnimatedStyle(() => ({
         backgroundColor: interpolateColor(personalAnim.value, [0, 1], ["#ffffff00", "#fff"]),
@@ -44,7 +46,7 @@ export default function PrayerTab({ onPress }: { onPress?: (state: string) => vo
                 <Pressable
                     style={{ flex: 1, alignItems: "center" }}
                     onPress={() => {
-                        setState("Personal");
+                        setPrayerMode("Personal");
                         onPress?.("Personal");
                     }}
                 >
@@ -57,7 +59,7 @@ export default function PrayerTab({ onPress }: { onPress?: (state: string) => vo
                 <Pressable
                     style={{ flex: 1, alignItems: "center" }}
                     onPress={() => {
-                        setState("Social");
+                        setPrayerMode("Social");
                         onPress?.("Social");
                     }}
                 >
@@ -74,13 +76,10 @@ export default function PrayerTab({ onPress }: { onPress?: (state: string) => vo
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        height: "auto",
         justifyContent: "center",
         alignItems: "center",
     },
     row: {
-        flex: 1,
         flexDirection: "row",
         width: "100%",
         justifyContent: "space-around",
@@ -94,6 +93,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 5,
         borderRadius: 99999,
-        margin: 4,
     },
 });
