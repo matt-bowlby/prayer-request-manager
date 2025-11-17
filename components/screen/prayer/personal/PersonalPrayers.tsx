@@ -5,7 +5,7 @@ import { usePrayerModeStore } from "../../../../stores/PrayerModeStore";
 import Prayer from "../Prayer";
 import { usePrayerStore } from "../../../../stores/PrayerStore";
 
-export default function PersonalPrayers() {
+export default function PersonalPrayers({navigation}: {navigation?: any}) {
     const getRandomPrayer = usePrayerStore((state) => state.getRandomPrayer);
     const [prayers, setPrayers] = useState<Object[]>([]);
     const mode = usePrayerModeStore((state) => state.mode);
@@ -28,7 +28,7 @@ export default function PersonalPrayers() {
             >
                 <FlatList
                     data={prayers}
-                    renderItem={({ item }) => <View style={{ width: "100%", height: height, justifyContent: "center", alignItems: "center"}}><Prayer info={item} /></View>}
+                    renderItem={({ item }) => <View style={{ width: "100%", height: height, justifyContent: "center", alignItems: "center"}}><Prayer info={item} navigation={navigation} /></View>}
                     keyExtractor={(item) => {
                         if (typeof item === "object" && item !== null && "_id" in item && typeof item._id === "string") {
                             return item._id;

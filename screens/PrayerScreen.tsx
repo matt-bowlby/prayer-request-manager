@@ -25,7 +25,7 @@ export default function PrayerScreen({ navigation }: any) {
                 <View style={{ flex: 1, width: "100%" }}>
                     <View style={{ flex: 1, width: "100%" }}>
                         {
-                            prayerMode === "Personal" ? <PersonalPrayers /> : <SocialPrayers />
+                            prayerMode === "Personal" ? <PersonalPrayers navigation={navigation} /> : <SocialPrayers />
                         }
                     </View>
                 </View>

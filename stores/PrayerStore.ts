@@ -5,6 +5,7 @@ interface PrayerStore {
     unseen: string[];
     addPrayer: (prayer: Prayer) => void;
     removePrayer: (id: string) => void;
+    editPrayer: (id: string, updatedPrayer: Partial<Prayer>) => void;
     getRandomPrayer: () => Prayer | undefined;
 }
 
@@ -23,6 +24,16 @@ export const usePrayerStore = create<PrayerStore>((set, get) => ({
             state.prayers.delete(id);
             state.unseen = state.unseen.filter((prayerId) => prayerId !== id);
             return { prayers: state.prayers, unseen: state.unseen };
+        });
+    },
+    editPrayer: (id: string, updatedPrayer: Partial<Prayer>) => {
+        set((state) => {
+            const existingPrayer = state.prayers.get(id);
+            if (existingPrayer) {
+                const newPrayer = { ...existingPrayer, ...updatedPrayer };
+                state.prayers.set(id, newPrayer);
+            }
+            return { prayers: state.prayers };
         });
     },
     getRandomPrayer: () => {

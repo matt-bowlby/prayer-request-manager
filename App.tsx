@@ -11,6 +11,7 @@ import { useFonts } from "expo-font";
 import { useEffect } from "react";
 
 import { usePrayerStore } from "./stores/PrayerStore";
+import EditScreen from "./screens/EditScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -74,6 +75,7 @@ export default function App() {
                         <Stack.Screen name="Onboard" component={OnboardScreen} />
                         <Stack.Screen name="Prayer" component={PrayerScreen} />
                         <Stack.Screen name="Create" component={CreateScreen} />
+                        <Stack.Screen name="Edit" component={EditScreen} />
                     </Stack.Navigator>
                 </NavigationContainer>
             </View>
