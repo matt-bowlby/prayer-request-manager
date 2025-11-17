@@ -39,6 +39,7 @@ export default function CreateScreen({ navigation }: any) {
                         maxLength={500}
                         placeholderTextColor={"rgba(255, 255, 255, 0.45)"}
                         onChangeText={(value: string) => setDescription(value)}
+                        submitBehavior="blurAndSubmit"
                     />
                 </View>
                 <View style={{ width: "100%", alignItems: "center" }}>
