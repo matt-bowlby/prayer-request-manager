@@ -1,10 +1,11 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import Button from "../components/common/Button";
 import TextBox from "../components/common/TextBox";
 import { usePrayerStore } from "../stores/PrayerStore";
 import { useState } from "react";
+import { Keyboard } from "react-native";
 
 export default function CreateScreen({ navigation }: any) {
     const addPrayer = usePrayerStore((state) => state.addPrayer);
@@ -15,7 +16,7 @@ export default function CreateScreen({ navigation }: any) {
         <SafeAreaView
             style={{ width: "100%", height: "100%", paddingHorizontal: 20, paddingTop: 10 }}
         >
-            <View style={{ flex: 1, justifyContent: "space-between", alignItems: "center" }}>
+            <Pressable style={{ flex: 1, justifyContent: "space-between", alignItems: "center" }} onPress={Keyboard.dismiss}>
                 <View style={{ width: "100%", alignItems: "flex-start" }}>
                     <Text style={styles.title}>New Prayer Request</Text>
                 </View>
@@ -69,7 +70,7 @@ export default function CreateScreen({ navigation }: any) {
                         </Text>
                     </Button>
                 </View>
-            </View>
+            </Pressable>
         </SafeAreaView>
     );
 }
