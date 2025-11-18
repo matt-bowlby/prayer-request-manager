@@ -34,7 +34,6 @@ export default function Prayer({ navigation, info }: { navigation: any; info?: a
                             borderColor: "#ffffff55",
                         }}
                         onPress={() => {
-                            console.log("bruh");
                             navigation.navigate("Edit", { info });
                         }}
                     >
