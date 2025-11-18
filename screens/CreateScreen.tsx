@@ -18,7 +18,7 @@ export default function CreateScreen({ navigation }: any) {
         >
             <Pressable style={{ flex: 1, justifyContent: "space-between", alignItems: "center" }} onPress={Keyboard.dismiss}>
                 <View style={{ width: "100%", alignItems: "flex-start" }}>
-                    <Text style={styles.title}>New Prayer Request</Text>
+                    <Text style={styles.title}>New Prayer</Text>
                 </View>
                 <View style={{ width: "100%", gap: 20 }}>
                     <TextBox
@@ -45,6 +45,8 @@ export default function CreateScreen({ navigation }: any) {
                 </View>
                 <View style={{ width: "100%", alignItems: "center" }}>
                     <Button
+                        disabled={title.length === 0 || description.length === 0}
+                        disabledStyleProps={{ opacity: 0.5 }}
                         styleProps={{
                             marginTop: 20,
                             paddingVertical: 30,

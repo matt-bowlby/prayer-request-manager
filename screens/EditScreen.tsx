@@ -5,6 +5,7 @@ import Button from "../components/common/Button";
 import TextBox from "../components/common/TextBox";
 import { usePrayerStore } from "../stores/PrayerStore";
 import { useState } from "react";
+import X from "../components/common/icons/X";
 
 export default function CreateScreen({ route, navigation }: any) {
     const { info } = route.params;
@@ -16,9 +17,22 @@ export default function CreateScreen({ route, navigation }: any) {
         <SafeAreaView
             style={{ width: "100%", height: "100%", paddingHorizontal: 20, paddingTop: 10 }}
         >
-            <Pressable style={{ flex: 1, justifyContent: "space-between", alignItems: "center" }} onPress={Keyboard.dismiss}>
-                <View style={{ width: "100%", alignItems: "flex-start" }}>
-                    <Text style={styles.title}>Edit Prayer Request</Text>
+            <Pressable
+                style={{ flex: 1, justifyContent: "space-between", alignItems: "center" }}
+                onPress={Keyboard.dismiss}
+            >
+                <View
+                    style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <Text style={styles.title}>Edit Prayer</Text>
+                    <Pressable onPress={() => navigation.goBack()}>
+                        <X width={40} height={40} color={"#ffffff"} />
+                    </Pressable>
                 </View>
                 <View style={{ width: "100%", gap: 20 }}>
                     <TextBox
