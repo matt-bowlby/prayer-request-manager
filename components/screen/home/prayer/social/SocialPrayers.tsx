@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { useEffect } from "react";
-import { usePrayerModeStore } from "../../../../stores/PrayerModeStore";
+import { usePrayerModeStore } from "../../../../../stores/PrayerModeStore";
 
 export default function SocialPrayers({ prayers }: { prayers?: Prayer[] }) {
     const mode = usePrayerModeStore((state) => state.mode);

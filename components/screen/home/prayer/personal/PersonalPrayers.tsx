@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import * as Random from 'expo-crypto';
 import { useEffect, useState } from "react";
-import { usePrayerModeStore } from "../../../../stores/PrayerModeStore";
+import { usePrayerModeStore } from "../../../../../stores/PrayerModeStore";
 import Prayer from "../Prayer";
-import { usePrayerStore } from "../../../../stores/PrayerStore";
+import { usePrayerStore } from "../../../../../stores/PrayerStore";
 
 export default function PersonalPrayers({navigation}: {navigation?: any}) {
     const getRandomPrayer = usePrayerStore((state) => state.getRandomPrayer);

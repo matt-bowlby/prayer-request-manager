@@ -78,7 +78,7 @@ export default function CreateScreen({ route, navigation }: any) {
                                 createdAt: new Date(),
                                 updatedAt: new Date(),
                             });
-                            navigation.navigate("Prayer");
+                            navigation.navigate("Home");
                         }}
                     >
                         <Text style={{ fontFamily: "Archivo", fontWeight: "900", fontSize: 25 }}>

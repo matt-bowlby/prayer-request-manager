@@ -2,8 +2,6 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import Background from "./components/common/Background";
 import OnboardScreen from "./screens/OnboardScreen";
-import PrayerScreen from "./screens/PrayerScreen";
-import CreateScreen from "./screens/CreateScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -12,6 +10,7 @@ import { useEffect } from "react";
 import { usePrayerStore } from "./stores/PrayerStore";
 import EditScreen from "./screens/EditScreen";
 import FirstCreateScreen from "./screens/FirstCreateScreen";
+import HomeScreen from "./screens/HomeScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -66,7 +65,7 @@ export default function App() {
                 <Background />
                 <NavigationContainer>
                     <Stack.Navigator
-                        initialRouteName="Onboard"
+                        initialRouteName="Home"
                         screenOptions={{
                             headerShown: false, // removes the top bar
                             contentStyle: { backgroundColor: "#00000000" }, // sets the screen background
@@ -74,8 +73,7 @@ export default function App() {
                     >
                         <Stack.Screen name="Onboard" component={OnboardScreen} />
                         <Stack.Screen name="FirstCreate" component={FirstCreateScreen} />
-                        <Stack.Screen name="Prayer" component={PrayerScreen} />
-                        <Stack.Screen name="Create" component={CreateScreen} />
+                        <Stack.Screen name="Home" component={HomeScreen} />
                         <Stack.Screen name="Edit" component={EditScreen} />
                     </Stack.Navigator>
                 </NavigationContainer>

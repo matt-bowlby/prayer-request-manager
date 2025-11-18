@@ -59,6 +59,7 @@ export default function FirstCreateScreen({ navigation }: any) {
                             alignItems: "center",
                         }}
                         onPress={() => {
+                            if (title.length === 0 || description.length === 0) return;
                             addPrayer({
                                 id: Math.random().toString(36).toString(),
                                 title: title,
@@ -67,7 +68,7 @@ export default function FirstCreateScreen({ navigation }: any) {
                                 createdAt: new Date(),
                                 updatedAt: new Date(),
                             });
-                            navigation.navigate("Prayer");
+                            navigation.navigate("Home");
                         }}
                     >
                         <Text style={{ fontFamily: "Archivo", fontWeight: "900", fontSize: 25 }}>

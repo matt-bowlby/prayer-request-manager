@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import Button from "../../common/Button";
-import Pencil from "../../common/icons/Pencil";
-import Plus from "../../common/icons/Plus";
-import ChevronLeft from "../../common/icons/ChevronLeft";
-import ChevronRight from "../../common/icons/ChevronRight";
+import Button from "../../../common/Button";
+import Pencil from "../../../common/icons/Pencil";
+import Plus from "../../../common/icons/Plus";
+import ChevronLeft from "../../../common/icons/ChevronLeft";
+import ChevronRight from "../../../common/icons/ChevronRight";
 
 export default function Prayer({ navigation, info }: { navigation: any; info?: any }) {
     return (
