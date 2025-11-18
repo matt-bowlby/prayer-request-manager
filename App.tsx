@@ -9,9 +9,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
-
 import { usePrayerStore } from "./stores/PrayerStore";
 import EditScreen from "./screens/EditScreen";
+import FirstCreateScreen from "./screens/FirstCreateScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -73,6 +73,7 @@ export default function App() {
                         }}
                     >
                         <Stack.Screen name="Onboard" component={OnboardScreen} />
+                        <Stack.Screen name="FirstCreate" component={FirstCreateScreen} />
                         <Stack.Screen name="Prayer" component={PrayerScreen} />
                         <Stack.Screen name="Create" component={CreateScreen} />
                         <Stack.Screen name="Edit" component={EditScreen} />

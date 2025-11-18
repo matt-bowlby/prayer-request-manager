@@ -13,7 +13,7 @@ export default function OnboardScreen({ navigation }: any) {
                 </View>
                 <Button
                     styleProps={{ marginTop: 20, paddingVertical: 30, paddingHorizontal: 20, width: "100%", justifyContent: "center", alignItems: "center" }}
-                    onPress={() => navigation.navigate("Create")}
+                    onPress={() => navigation.navigate("FirstCreate")}
                 >
                     <Text style={{fontFamily: "Archivo", fontWeight: "900", fontSize: 25}}>Get Started</Text>
                 </Button>
