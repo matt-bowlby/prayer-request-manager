@@ -1,8 +1,8 @@
 import { StyleSheet, Pressable, Text } from "react-native";
 
-export default function Button({ styleProps, onPress, children }: { styleProps?: any, onPress?: () => void, children?: React.ReactNode }) {
+export default function Button({ styleProps, onPress, disabled, disabledStyleProps, children }: { styleProps?: any, onPress?: () => void, disabled?: boolean, disabledStyleProps?: any, children?: React.ReactNode }) {
     return (
-        <Pressable style={[styles.button, styleProps]} onPress={onPress}>
+        <Pressable style={[styles.button, styleProps, disabled && disabledStyleProps]} onPress={onPress} disabled={disabled}>
             {children}
         </Pressable>
     );
