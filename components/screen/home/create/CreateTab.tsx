@@ -64,6 +64,7 @@ export default function CreateTab({ onSubmit }: { onSubmit?: () => void }) {
                             tags: [],
                             createdAt: new Date(),
                             updatedAt: new Date(),
+                            seen: false,
                         });
 						if (onSubmit) {
 							onSubmit();

@@ -11,8 +11,8 @@ import Animated, {
 export default function PrayerTabHeader({ onPress }: { onPress?: (state: string) => void }) {
     let prayerMode = usePrayerModeStore((state) => state.mode);
     let setPrayerMode = usePrayerModeStore((state) => state.setPrayerMode);
-    const personalAnim = useSharedValue(1);
-    const socialAnim = useSharedValue(0);
+    const personalAnim = useSharedValue(prayerMode === "Personal" ? 1 : 0);
+    const socialAnim = useSharedValue(prayerMode === "Social" ? 1 : 0);
 
     useEffect(() => {
         if (prayerMode === "Personal") {

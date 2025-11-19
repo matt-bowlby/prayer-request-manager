@@ -7,7 +7,7 @@ import { usePrayerStore } from "../stores/PrayerStore";
 import { useState } from "react";
 import { Keyboard } from "react-native";
 
-export default function FirstCreateScreen({ navigation }: any) {
+export default function CreateScreen({ navigation }: any) {
     const addPrayer = usePrayerStore((state) => state.addPrayer);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -21,7 +21,7 @@ export default function FirstCreateScreen({ navigation }: any) {
                 onPress={Keyboard.dismiss}
             >
                 <View style={{ width: "100%", alignItems: "flex-start" }}>
-                    <Text style={styles.title}>Your First Prayer</Text>
+                    <Text style={styles.title}>New Prayer</Text>
                 </View>
                 <View style={{ width: "100%", gap: 20 }}>
                     <TextBox
@@ -59,7 +59,6 @@ export default function FirstCreateScreen({ navigation }: any) {
                             alignItems: "center",
                         }}
                         onPress={() => {
-                            if (title.length === 0 || description.length === 0) return;
                             addPrayer({
                                 id: Math.random().toString(36).toString(),
                                 title: title,

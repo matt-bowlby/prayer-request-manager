@@ -1,24 +1,27 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import * as Random from 'expo-crypto';
-import { useEffect, useState } from "react";
-import { usePrayerModeStore } from "../../../../../stores/PrayerModeStore";
+import * as Random from "expo-crypto";
+import { useEffect, useRef, useState } from "react";
 import Prayer from "../Prayer";
 import { usePrayerStore } from "../../../../../stores/PrayerStore";
+import { create } from "zustand";
 
-export default function PersonalPrayers({navigation}: {navigation?: any}) {
-    const getRandomPrayer = usePrayerStore((state) => state.getRandomPrayer);
-    const [prayers, setPrayers] = useState<Object[]>([]);
-    const mode = usePrayerModeStore((state) => state.mode);
-    const [height, setHeight] = useState(0);
+interface HeightStore {
+    height: number;
+    setHeight: (height: number) => void;
+}
 
-    useEffect(() => {
-        const newPrayers: Object[] = [];
-        for (let i = 0; i < 3; i++) {
-            const p = getRandomPrayer();
-            if (p) newPrayers.push({...p, _id: Random.getRandomBytes(16).toString()});
-        }
-        setPrayers(newPrayers);
-    }, []);
+const useHeightStore = create<HeightStore>((set) => ({
+    height: 200,
+    setHeight: (height) => set({ height }),
+}));
+
+export default function PersonalPrayers({
+    navigation
+}: {
+    navigation?: any;
+}) {
+    const prayers = usePrayerStore((state) => state.prayers);
+    const { height, setHeight } = useHeightStore();
 
     return (
         <View style={styles.container}>
@@ -27,28 +30,36 @@ export default function PersonalPrayers({navigation}: {navigation?: any}) {
                 style={{ flex: 1, width: "100%", gap: 10 }}
             >
                 <FlatList
+                    // optional: set initialScrollIndex if you prefer initial-only scrolling
+                    // initialScrollIndex={initialIndex}
+                    getItemLayout={(_data, index) => ({
+                        length: height,
+                        offset: height * index,
+                        index,
+                    })}
                     data={prayers}
-                    renderItem={({ item }) => <View style={{ width: "100%", height: height, justifyContent: "center", alignItems: "center"}}><Prayer info={item} navigation={navigation} /></View>}
+                    renderItem={({ item }) => (
+                        <View
+                            style={{
+                                width: "100%",
+                                height: height,
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Prayer info={item} navigation={navigation} />
+                        </View>
+                    )}
                     keyExtractor={(item) => {
-                        if (typeof item === "object" && item !== null && "_id" in item && typeof item._id === "string") {
-                            return item._id;
-                        }
-                        return Math.random().toString();
+                        // ensure a string key; adapt if your item uses _id or id
+                        // fallback to index-based deterministic ID if needed
+                        return (item as any)?.id || (item as any)?._id || Math.random().toString();
                     }}
                     pagingEnabled
                     snapToInterval={height}
                     snapToAlignment="start"
                     decelerationRate="fast"
                     showsVerticalScrollIndicator={false}
-                    onEndReachedThreshold={0.25}
-                    onEndReached={(_) => {
-                        const newPrayers: Object[] = [];
-                        for (let i = 0; i < 3; i++) {
-                            const p = getRandomPrayer();
-                            if (p) newPrayers.push({...p, _id: Random.getRandomBytes(16).toString()});
-                        }
-                        setPrayers((prevPrayers) => [...prevPrayers, ...newPrayers]);
-                    }}
                 />
             </View>
         </View>

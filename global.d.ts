@@ -5,4 +5,5 @@ interface Prayer {
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
+    seen: boolean;
 }

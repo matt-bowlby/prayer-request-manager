@@ -1,54 +1,72 @@
 import { create } from "zustand";
 
 interface PrayerStore {
-    prayers: Map<string, Prayer>;
-    unseen: string[];
+    prayers: Prayer[];
     addPrayer: (prayer: Prayer) => void;
     removePrayer: (id: string) => void;
     editPrayer: (id: string, updatedPrayer: Partial<Prayer>) => void;
-    getRandomPrayer: () => Prayer | undefined;
+    randomizePrayerList: () => void;
+    getLastSeenPrayerIndex: () => number;
+    setSeen: (id: string) => void;
 }
 
 export const usePrayerStore = create<PrayerStore>((set, get) => ({
-    prayers: new Map<string, Prayer>(),
-    unseen: [],
+    prayers: [],
     addPrayer: (prayer: Prayer) => {
         set((state) => {
-            state.prayers.set(prayer.id, prayer);
-            state.unseen.push(prayer.id);
-            return { prayers: state.prayers, unseen: state.unseen };
+            // Add new prayer to start of prayer list
+            state.prayers.unshift(prayer);
+            return { prayers: state.prayers };
         });
     },
     removePrayer: (id: string) => {
         set((state) => {
-            state.prayers.delete(id);
-            state.unseen = state.unseen.filter((prayerId) => prayerId !== id);
-            return { prayers: state.prayers, unseen: state.unseen };
+            state.prayers = state.prayers.filter((prayer) => prayer.id !== id);
+            return { prayers: state.prayers };
         });
     },
     editPrayer: (id: string, updatedPrayer: Partial<Prayer>) => {
         set((state) => {
-            const existingPrayer = state.prayers.get(id);
+            const existingPrayer = state.prayers.find((prayer) => prayer.id === id);
             if (existingPrayer) {
                 const newPrayer = { ...existingPrayer, ...updatedPrayer };
-                state.prayers.set(id, newPrayer);
+                state.prayers = state.prayers.map((prayer) =>
+                    prayer.id === id ? newPrayer : prayer
+                );
             }
             return { prayers: state.prayers };
         });
     },
-    getRandomPrayer: () => {
-        if (get().prayers.size === 0) return undefined;
-        if (get().unseen.length === 0) {
-            // Reset unseen prayers
-            set(() => ({ unseen: Array.from(get().prayers.keys()) }));
-        }
-        const randomIndex = Math.floor(Math.random() * get().unseen.length);
-        const randomId = get().unseen[randomIndex];
+    randomizePrayerList: () => {
         set((state) => {
-            const newUnseen = [...state.unseen];
-            newUnseen.splice(randomIndex, 1);
-            return { unseen: newUnseen };
+            const shuffled = [...state.prayers];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return { prayers: shuffled };
         });
-        return get().prayers.get(randomId);
+        // Reset all prayers to unseen
+        set((state) => {
+            state.prayers = state.prayers.map((prayer) => ({ ...prayer, seen: false }));
+            return { prayers: state.prayers };
+        });
     },
+    getLastSeenPrayerIndex: () => {
+        const prayers = get().prayers;
+        for (let i = prayers.length - 1; i >= 0; i--) {
+            if (prayers[i].seen) {
+                return i;
+            }
+        }
+        return -1; // No prayers have been seen
+    },
+    setSeen: (id: string) => {
+        set((state) => {
+            state.prayers = state.prayers.map((prayer) =>
+                prayer.id === id ? { ...prayer, seen: true } : prayer
+            );
+            return { prayers: state.prayers };
+        });
+    }
 }));

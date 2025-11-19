@@ -5,8 +5,13 @@ import Pencil from "../../../common/icons/Pencil";
 import Plus from "../../../common/icons/Plus";
 import ChevronLeft from "../../../common/icons/ChevronLeft";
 import ChevronRight from "../../../common/icons/ChevronRight";
+import { usePrayerStore } from "../../../../stores/PrayerStore";
 
 export default function Prayer({ navigation, info }: { navigation: any; info?: any }) {
+    React.useEffect(() => {
+        usePrayerStore.getState().setSeen(info.id);
+    }, []);
+
     return (
         <View style={{ width: "100%", gap: 10 }}>
             <View style={{ width: "100%", gap: 10 }}>
