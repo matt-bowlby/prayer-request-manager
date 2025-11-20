@@ -1,5 +1,5 @@
 import { useFonts } from "expo-font";
-import { useEffect } from "react";
+import React from "react";
 
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
@@ -29,21 +29,27 @@ export default function App() {
         Archivo_700: require("./assets/fonts/Archivo/Archivo-Bold.ttf"),
         Archivo_900: require("./assets/fonts/Archivo/Archivo-Black.ttf"),
     });
+    const [appReady, setAppReady] = React.useState(false);
 
-    useEffect(() => {
+    React.useEffect(() => {
+        let mounted = true;
         async function fetchData() {
-            await initDB().catch((err) => {
-                console.error("Failed to initialize database:", err);
-            });
-            await usePrayerStore.getState().getPrayers().catch((err) => {
-                console.error("Failed to load prayers on app start:", err);
-            });
+            try {
+                await initDB();
+                await usePrayerStore.getState().getPrayers();
+            } catch (err) {
+                console.error("startup failure:", err);
+            } finally {
+                if (mounted) setAppReady(true);
+            }
         }
         fetchData();
+        return () => {
+            mounted = false;
+        };
     }, []);
 
-    if (!fontsLoaded) return null;
-    if (!usePrayerStore.getState().prayers) return null;
+    if (!fontsLoaded || !appReady) return null;
 
     return (
         <SafeAreaProvider>
