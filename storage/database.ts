@@ -99,13 +99,10 @@ async function processPendingTransactions(): Promise<void> {
 
             try {
                 const database = await ensureDB();
-                console.log("transaction log: ", row);
-                console.log("Processing transaction id:", id, "with command:", cmdObj); // Debug log
                 await database.withTransactionAsync(async () => {
                     const params = cmdObj?.params ?? [];
                     if (cmdObj) await database.runAsync(cmdObj.sql, ...params);
                 });
-                console.log("Transaction id:", id, "processed successfully"); // Debug log
 
                 // success -> remove from queue
                 const database2 = await ensureDB();
@@ -183,8 +180,6 @@ function editPrayer(prayerID: number, updatedFields: Partial<Prayer>): Promise<v
         WHERE id = ?
     `;
     const params = [...values, prayerID];
-
-    console.log("Enqueue editPrayer with params:", params); // Debug log
 
     return enqueueCommand({ sql, params });
 }
