@@ -6,4 +6,5 @@ interface Prayer {
     createdAt: Date;
     updatedAt: Date;
     seen: boolean;
+    deleted: boolean;
 }

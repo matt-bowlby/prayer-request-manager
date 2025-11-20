@@ -36,6 +36,7 @@ export default function App() {
             createdAt: new Date(),
             updatedAt: new Date(),
             seen: false,
+            deleted: false,
         });
         addPrayer({
             id: "2",
@@ -45,6 +46,7 @@ export default function App() {
             createdAt: new Date(),
             updatedAt: new Date(),
             seen: false,
+            deleted: false,
         });
         addPrayer({
             id: "3",
@@ -54,6 +56,7 @@ export default function App() {
             createdAt: new Date(),
             updatedAt: new Date(),
             seen: false,
+            deleted: false,
         });
     }, [addPrayer, fontsLoaded]);
 

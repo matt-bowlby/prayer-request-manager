@@ -68,6 +68,7 @@ export default function FirstCreateScreen({ navigation }: any) {
                                 createdAt: new Date(),
                                 updatedAt: new Date(),
                                 seen: false,
+                                deleted: false,
                             });
                             navigation.navigate("Home");
                         }}
