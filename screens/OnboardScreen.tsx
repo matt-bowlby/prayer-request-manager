@@ -5,17 +5,17 @@ import Button from "../components/common/Button";
 
 export default function OnboardScreen({ navigation }: any) {
     return (
-        <SafeAreaView style={{ width: "100%", height: "100%", paddingHorizontal: 20, paddingTop: 10 }}>
-            <View style={{ flex: 1, justifyContent: "space-between", alignItems: "center"}}>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.frame}>
                 <View>
                     <Text style={styles.title}>Welcome to your personal</Text>
                     <Text style={styles.titleBold}>Prayer Request Manager</Text>
                 </View>
                 <Button
-                    styleProps={{ marginTop: 20, paddingVertical: 30, paddingHorizontal: 20, width: "100%", justifyContent: "center", alignItems: "center" }}
+                    styleProps={styles.button}
                     onPress={() => navigation.navigate("FirstCreate")}
                 >
-                    <Text style={{fontFamily: "Archivo", fontWeight: "900", fontSize: 25}}>Get Started</Text>
+                    <Text style={styles.buttonText}>Get Started</Text>
                 </Button>
             </View>
         </SafeAreaView>
@@ -33,5 +33,30 @@ const styles = StyleSheet.create({
         fontSize: 40,
         color: "#fff",
         fontWeight: "900",
+    },
+    safeArea: {
+        width: "100%",
+        height: "100%",
+        paddingHorizontal: 20,
+        paddingTop: 10,
+    },
+    frame: {
+        flex: 1,
+        justifyContent: "space-between",
+        alignItems: "center",
+        width: "100%",
+    },
+    button: {
+        marginTop: 20,
+        paddingVertical: 30,
+        paddingHorizontal: 20,
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    buttonText: {
+        fontFamily: "Archivo",
+        fontWeight: "900",
+        fontSize: 25,
     },
 });
