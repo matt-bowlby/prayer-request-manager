@@ -14,12 +14,15 @@ import OnboardScreen from "./screens/OnboardScreen";
 import EditScreen from "./screens/EditScreen";
 import FirstCreateScreen from "./screens/FirstCreateScreen";
 import HomeScreen from "./screens/HomeScreen";
+import * as SplashScreen from "expo-splash-screen";
 
 import { initDB } from "./storage/database";
 
 import { usePrayerStore } from "./stores/PrayerStore";
 
 const Stack = createNativeStackNavigator();
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
     const [fontsLoaded] = useFonts({
@@ -30,6 +33,7 @@ export default function App() {
         Archivo_900: require("./assets/fonts/Archivo/Archivo-Black.ttf"),
     });
     const [appReady, setAppReady] = React.useState(false);
+    const [bgLoaded, setBgLoaded] = React.useState(false);
 
     React.useEffect(() => {
         let mounted = true;
@@ -40,7 +44,9 @@ export default function App() {
             } catch (err) {
                 console.error("startup failure:", err);
             } finally {
-                if (mounted) setAppReady(true);
+                if (mounted) {
+                    setAppReady(true);
+                }
             }
         }
         fetchData();
@@ -49,16 +55,31 @@ export default function App() {
         };
     }, []);
 
+    React.useEffect(() => {
+        async function hideSplash() {
+            if (bgLoaded && appReady) {
+                await SplashScreen.hideAsync();
+            }
+        }
+        hideSplash();
+    }, [bgLoaded, appReady]);
+
     if (!fontsLoaded || !appReady) return null;
 
     return (
         <SafeAreaProvider>
             <View style={styles.container}>
                 <StatusBar style="light" />
-                <Background />
+                <Background
+                    onLoadEnd={() => {
+                        setBgLoaded(true);
+                    }}
+                />
                 <NavigationContainer>
                     <Stack.Navigator
-                        initialRouteName={usePrayerStore.getState().prayers.length <= 0 ? "Onboard" : "Home"}
+                        initialRouteName={
+                            usePrayerStore.getState().prayers.length <= 0 ? "Onboard" : "Home"
+                        }
                         screenOptions={{
                             headerShown: false,
                             contentStyle: { backgroundColor: "#00000000" },
