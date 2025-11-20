@@ -58,13 +58,14 @@ export default function CreateTab({ onSubmit }: { onSubmit?: () => void }) {
                     onPress={() => {
 						if (title.length === 0 || description.length === 0) return;
                         addPrayer({
-                            id: Math.random().toString(36).toString(),
+                            id: 0,
                             title: title,
                             description: description,
                             tags: [],
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
+                            createdAt: (new Date()).toISOString(),
+                            updatedAt: (new Date()).toISOString(),
                             seen: false,
+                            deleted: false,
                         });
 						if (onSubmit) {
 							onSubmit();

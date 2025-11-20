@@ -71,12 +71,10 @@ export default function CreateScreen({ route, navigation }: any) {
                         }}
                         onPress={() => {
                             EditPrayer(info.id, {
-                                id: Math.random().toString(36).toString(),
                                 title: title,
                                 description: description,
                                 tags: [],
-                                createdAt: new Date(),
-                                updatedAt: new Date(),
+                                updatedAt: new Date().toISOString(),
                             });
                             navigation.navigate("Home");
                         }}

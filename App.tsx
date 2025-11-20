@@ -1,16 +1,23 @@
+import { useFonts } from "expo-font";
+import { useEffect } from "react";
+
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
+
 import Background from "./components/common/Background";
-import OnboardScreen from "./screens/OnboardScreen";
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import { useEffect } from "react";
-import { usePrayerStore } from "./stores/PrayerStore";
+
+import OnboardScreen from "./screens/OnboardScreen";
 import EditScreen from "./screens/EditScreen";
 import FirstCreateScreen from "./screens/FirstCreateScreen";
 import HomeScreen from "./screens/HomeScreen";
+
+import { initDB } from "./storage/database";
+
+import { usePrayerStore } from "./stores/PrayerStore";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,46 +30,20 @@ export default function App() {
         Archivo_900: require("./assets/fonts/Archivo/Archivo-Black.ttf"),
     });
 
-    // Always call hooks at the top level
-    const addPrayer = usePrayerStore((state) => state.addPrayer);
-
     useEffect(() => {
-        if (!fontsLoaded) return;
-        addPrayer({
-            id: "1",
-            title: "Sample Prayer 1",
-            description: "This is the content of sample prayer 1.",
-            tags: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            seen: false,
-            deleted: false,
-        });
-        addPrayer({
-            id: "2",
-            title: "Sample Prayer 2",
-            description: "This is the content of sample prayer 2.",
-            tags: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            seen: false,
-            deleted: false,
-        });
-        addPrayer({
-            id: "3",
-            title: "Sample Prayer 3",
-            description: "This is the content of sample prayer 3.",
-            tags: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            seen: false,
-            deleted: false,
-        });
-    }, [addPrayer, fontsLoaded]);
+        async function fetchData() {
+            await initDB().catch((err) => {
+                console.error("Failed to initialize database:", err);
+            });
+            await usePrayerStore.getState().getPrayers().catch((err) => {
+                console.error("Failed to load prayers on app start:", err);
+            });
+        }
+        fetchData();
+    }, []);
 
-    if (!fontsLoaded) {
-        return null;
-    }
+    if (!fontsLoaded) return null;
+    if (!usePrayerStore.getState().prayers) return null;
 
     return (
         <SafeAreaProvider>
@@ -71,10 +52,10 @@ export default function App() {
                 <Background />
                 <NavigationContainer>
                     <Stack.Navigator
-                        initialRouteName="Home"
+                        initialRouteName={usePrayerStore.getState().prayers.length <= 0 ? "Onboard" : "Home"}
                         screenOptions={{
-                            headerShown: false, // removes the top bar
-                            contentStyle: { backgroundColor: "#00000000" }, // sets the screen background
+                            headerShown: false,
+                            contentStyle: { backgroundColor: "#00000000" },
                         }}
                     >
                         <Stack.Screen name="Onboard" component={OnboardScreen} />

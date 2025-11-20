@@ -1,10 +1,10 @@
 interface Prayer {
-    id: string;
+    id: number;
     title: string;
     description: string;
     tags: string[];
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     seen: boolean;
     deleted: boolean;
 }

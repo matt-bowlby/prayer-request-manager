@@ -1,6 +1,11 @@
 import { openDatabaseAsync, SQLiteDatabase } from "expo-sqlite";
 
-const db: SQLiteDatabase = await openDatabaseAsync("database.db");
+let db: SQLiteDatabase | null = null;
+async function ensureDB(): Promise<SQLiteDatabase> {
+    if (db) return db;
+    db = await openDatabaseAsync("database.db");
+    return db;
+}
 
 const COLUMNS = [
     "id",
@@ -14,33 +19,35 @@ const COLUMNS = [
 ];
 
 // Transactions queue table (persistent)
-function initTransactionsTable(): Promise<void> {
-    return db.execAsync(`
-		CREATE TABLE IF NOT EXISTS transactions (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			command TEXT NOT NULL,
-			attempts INTEGER NOT NULL DEFAULT 0,
-			last_error TEXT
-		);
-	`);
+async function initTransactionsTable(): Promise<void> {
+    const database = await ensureDB();
+    return database.execAsync(`
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            command TEXT NOT NULL,
+            attempts INTEGER NOT NULL DEFAULT 0,
+            last_error TEXT
+        );
+    `);
 }
 
 async function initDB(): Promise<void> {
     // ensure transactions table exists and start worker
     await initTransactionsTable();
 
-    await db.execAsync(`
-		CREATE TABLE IF NOT EXISTS user_prayers (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			title TEXT NOT NULL,
-			description TEXT NOT NULL,
-			tags TEXT,
-			date_created TEXT NOT NULL,
-			date_updated TEXT NOT NULL,
-			seen INTEGER NOT NULL DEFAULT 0,
-			deleted INTEGER NOT NULL DEFAULT 0
-		);
-	`);
+    const database = await ensureDB();
+    await database.execAsync(`
+        CREATE TABLE IF NOT EXISTS user_prayers (
+            id INTEGER PRIMARY KEY,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            tags TEXT,
+            date_created TEXT NOT NULL,
+            date_updated TEXT NOT NULL,
+            seen INTEGER NOT NULL DEFAULT 0,
+            deleted INTEGER NOT NULL DEFAULT 0
+        );
+    `);
 
     // kick off queue worker to resume any pending commands
     startQueueWorker();
@@ -50,13 +57,18 @@ type CommandObj = { sql: string; params?: any[] };
 
 async function enqueueCommand(commandObj: CommandObj): Promise<void> {
     const commandText = JSON.stringify(commandObj);
-    await db.runAsync(`INSERT INTO transactions (command, attempts) VALUES (?, 0)`, commandText);
+    const database = await ensureDB();
+    await database.runAsync(
+        `INSERT INTO transactions (command, attempts) VALUES (?, 0)`,
+        commandText
+    );
 }
 
 async function getPendingTransactions(): Promise<
     { id: number; command: string; attempts: number }[]
 > {
-    const res: any = await db.getAllAsync(
+    const database = await ensureDB();
+    const res: any = await database.getAllAsync(
         `SELECT id, command, attempts FROM transactions ORDER BY id ASC;`
     );
     return res || [];
@@ -76,7 +88,8 @@ async function processPendingTransactions(): Promise<void> {
             try {
                 cmdObj = JSON.parse(row.command);
             } catch (err) {
-                await db.runAsync(
+                const database = await ensureDB();
+                await database.runAsync(
                     `UPDATE transactions SET attempts = attempts + 1, last_error = ? WHERE id = ?`,
                     `invalid-json:${String(err)}`,
                     id
@@ -85,26 +98,30 @@ async function processPendingTransactions(): Promise<void> {
             }
 
             try {
-                await db.withTransactionAsync(async () => {
+                const database = await ensureDB();
+                console.log("transaction log: ", row);
+                console.log("Processing transaction id:", id, "with command:", cmdObj); // Debug log
+                await database.withTransactionAsync(async () => {
                     const params = cmdObj?.params ?? [];
-                    // spread params into runAsync so ? placeholders match
-                    if (cmdObj) await db.runAsync(cmdObj.sql, ...params);
+                    if (cmdObj) await database.runAsync(cmdObj.sql, ...params);
                 });
+                console.log("Transaction id:", id, "processed successfully"); // Debug log
 
                 // success -> remove from queue
-                await db.runAsync(`DELETE FROM transactions WHERE id = ?`, id);
+                const database2 = await ensureDB();
+                await database2.runAsync(`DELETE FROM transactions WHERE id = ?`, id);
             } catch (err: any) {
                 const attempts = (row.attempts ?? 0) + 1;
-                await db.runAsync(
+                const database = await ensureDB();
+                await database.runAsync(
                     `UPDATE transactions SET attempts = ?, last_error = ?, updated_at = ? WHERE id = ?`,
                     attempts,
                     String(err?.message ?? err),
                     new Date().toISOString(),
                     id
                 );
-                // optionally handle permanent failure after retries; leave row for inspection
                 if (attempts >= MAX_RETRIES) {
-                    // developer can inspect `last_error` or implement archival/dead-letter logic
+                    // optional dead-letter handling
                 }
             }
         }
@@ -129,24 +146,15 @@ function stopQueueWorker() {
     }
 }
 
-// Replace immediate execution with enqueueing
 function addPrayer(prayer: Prayer): Promise<void> {
-    const { title, description, tags, createdAt, updatedAt, seen } = prayer;
+    const { id, title, description, tags, createdAt, updatedAt } = prayer;
     const tagsString = JSON.stringify(tags);
-    const seenInt = seen ? 1 : 0;
 
     const sql = `
-		INSERT INTO user_prayers (title, description, tags, date_created, date_updated, seen, deleted)
-		VALUES (?, ?, ?, ?, ?, ?, 0);
-	`;
-    const params = [
-        title,
-        description,
-        tagsString,
-        createdAt.toISOString(),
-        updatedAt.toISOString(),
-        seenInt,
-    ];
+        INSERT INTO user_prayers (id, title, description, tags, date_created, date_updated, seen, deleted)
+        VALUES (?, ?, ?, ?, ?, ?, 0, 0);
+    `;
+    const params = [id, title, description, tagsString, createdAt, updatedAt];
 
     return enqueueCommand({ sql, params });
 }
@@ -170,11 +178,13 @@ function editPrayer(prayerID: number, updatedFields: Partial<Prayer>): Promise<v
     }
 
     const sql = `
-		UPDATE user_prayers
-		SET ${fields.join(", ")}
-		WHERE id = ?
-	`;
+        UPDATE user_prayers
+        SET ${fields.join(", ")}
+        WHERE id = ?
+    `;
     const params = [...values, prayerID];
+
+    console.log("Enqueue editPrayer with params:", params); // Debug log
 
     return enqueueCommand({ sql, params });
 }
@@ -184,10 +194,32 @@ function deletePrayer(prayerID: number): Promise<void> {
     return enqueueCommand({ sql, params: [prayerID] });
 }
 
+async function getPrayers(): Promise<Prayer[]> {
+    const sql = `
+        SELECT id, title, description, tags, date_created, date_updated, seen, deleted
+        FROM user_prayers
+        WHERE deleted != 1
+        ORDER BY date_created DESC
+    `;
+
+    const database = await ensureDB();
+    const res: any = await database.getAllAsync(sql);
+    const rows: any[] = res || [];
+    return rows.map((r) => ({
+        ...r,
+        tags: r.tags ? JSON.parse(r.tags) : [],
+        date_created: r.date_created ? new Date(r.date_created) : undefined,
+        date_updated: r.date_updated ? new Date(r.date_updated) : undefined,
+        seen: !!r.seen,
+        deleted: !!r.deleted,
+    })) as Prayer[];
+}
+
 export {
     initDB,
     addPrayer,
     editPrayer,
+    getPrayers,
     deletePrayer,
     startQueueWorker,
     stopQueueWorker,
