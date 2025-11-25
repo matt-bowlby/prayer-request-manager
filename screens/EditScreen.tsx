@@ -10,8 +10,8 @@ import X from "../components/common/icons/X";
 export default function CreateScreen({ route, navigation }: any) {
     const { info } = route.params;
     const EditPrayer = usePrayerStore((state) => state.editPrayer);
-    const [title, setTitle] = useState(info.title);
-    const [description, setDescription] = useState(info.description);
+    const [recipient, setRecipient] = useState(info.recipient);
+    const [body, setBody] = useState(info.body);
 
     return (
         <SafeAreaView
@@ -36,26 +36,26 @@ export default function CreateScreen({ route, navigation }: any) {
                 </View>
                 <View style={{ width: "100%", gap: 20 }}>
                     <TextBox
-                        label="Title"
-                        value={title}
-                        placeholder="Enter title"
+                        label="Recipient"
+                        value={recipient}
+                        placeholder="Who is this prayer for?"
                         labelStyle={styles.label}
                         style={[styles.textBoxContainer, { borderRadius: 20 }]}
                         placeholderTextColor={"rgba(255, 255, 255, 0.45)"}
                         maxLength={100}
-                        onChangeText={(value: string) => setTitle(value)}
+                        onChangeText={(value: string) => setRecipient(value)}
                     />
                     <TextBox
-                        label="Description"
-                        value={description}
-                        placeholder="Enter description"
+                        label="Prayer"
+                        value={body}
+                        placeholder="Edit prayer"
                         multiline
                         numberOfLines={6}
                         labelStyle={styles.label}
                         style={[styles.textBoxContainer, { borderRadius: 20, height: 120 }]}
                         maxLength={500}
                         placeholderTextColor={"rgba(255, 255, 255, 0.45)"}
-                        onChangeText={(value: string) => setDescription(value)}
+                        onChangeText={(value: string) => setBody(value)}
                         submitBehavior="blurAndSubmit"
                     />
                 </View>
@@ -71,9 +71,8 @@ export default function CreateScreen({ route, navigation }: any) {
                         }}
                         onPress={() => {
                             EditPrayer(info.id, {
-                                title: title,
-                                description: description,
-                                tags: [],
+                                recipient: recipient,
+                                body: body,
                                 updatedAt: new Date().toISOString(),
                             });
                             navigation.navigate("Home");

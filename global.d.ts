@@ -1,8 +1,10 @@
+type PrayerType = "pray" | "ask" | "praise" | "thank" | "confess" | "lament";
+
 interface Prayer {
     id: number;
-    title: string;
-    description: string;
-    tags: string[];
+    type: PrayerType;
+    recipient: string;
+    body: string;
     createdAt: string;
     updatedAt: string;
     seen: boolean;

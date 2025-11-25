@@ -26,9 +26,11 @@ export default function HomeScreen({ navigation }: any) {
                             // <SettingsTab />
                             <View />
                         ) : homeMode === "Create" ? (
-                            <CreateTab onSubmit={() => {
-                                setHomeMode("Prayer");
-                            }} />
+                            <View style={{ flex: 1, marginBottom: 20 }}>
+                                <CreateTab onSubmit={() => {
+                                    setHomeMode("Prayer");
+                                }} />
+                            </View>
                         ) : homeMode === "Prayer" ? (
                             <PrayerTab navigation={navigation} />
                         ) : null

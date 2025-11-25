@@ -1,64 +1,26 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Button from "../../../common/Button";
-import Pencil from "../../../common/icons/Pencil";
-import Plus from "../../../common/icons/Plus";
-import ChevronLeft from "../../../common/icons/ChevronLeft";
-import ChevronRight from "../../../common/icons/ChevronRight";
-import { usePrayerStore } from "../../../../stores/PrayerStore";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 
 export default function Prayer({ navigation, info }: { navigation: any; info?: any }) {
-    // React.useEffect(() => {
-    //     usePrayerStore.getState().setSeen(info.id);
-    // }, []);
-
     return (
-        <View style={{ width: "100%", gap: 10 }}>
-            <View style={{ width: "100%", gap: 10 }}>
-                <Text style={styles.title}>{info?.title}</Text>
-                <View style={styles.textContainer}>
-                    <Text style={styles.text}>{info?.description}</Text>
-                </View>
-            </View>
-            <View
-                style={{
-                    width: "100%",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    flexDirection: "row",
-                }}
+        <View style={{ width: "100%" }}>
+            <Pressable
+                style={{ width: "100%", gap: 10 }}
+                // onLongPress={() => {
+                //     console.log("bruh");
+                // }}
             >
-                <ChevronLeft width={40} height={40} color="white" />
-                <View style={{ flexDirection: "row", justifyContent: "center", gap: 40 }}>
-                    <Button
-                        styleProps={{
-                            padding: 5,
-                            borderRadius: 15,
-                            backgroundColor: "#ffffff44",
-                            borderWidth: 1,
-                            borderColor: "#ffffff55",
-                        }}
-                        onPress={() => {
-                            navigation.navigate("Edit", { info });
-                        }}
-                    >
-                        <Pencil width={24} height={24} color="white" />
-                    </Button>
-                    <Button
-                        styleProps={{
-                            padding: 5,
-                            borderRadius: 15,
-                            backgroundColor: "#ffffff44",
-                            borderWidth: 1,
-                            borderColor: "#ffffff55",
-                        }}
-                        onPress={() => {}}
-                    >
-                        <Plus width={24} height={24} color="white" />
-                    </Button>
+                <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                    <Text style={styles.text}>Lord, I </Text>
+                    <Text style={styles.textHighlight}>{info?.type}</Text>
+                    <Text style={styles.text}> on behalf of </Text>
+                    <Text style={styles.textHighlight}>{info?.recipient}</Text>
+                    <Text style={styles.text}>: </Text>
                 </View>
-                <ChevronRight width={40} height={40} color="white" />
-            </View>
+                <View style={{ width: "100%" }}>
+                    <Text style={styles.textHighlight}>{info?.body}</Text>
+                </View>
+            </Pressable>
         </View>
     );
 }
@@ -68,16 +30,16 @@ const styles = StyleSheet.create({
         width: "100%",
         borderTopWidth: 1,
         borderTopColor: "#ffffff45",
+        paddingTop: 10,
     },
-    title: {
+    textHighlight: {
         color: "#ffffff",
-        fontSize: 25,
-        fontWeight: "900",
-        textAlign: "left",
+        fontSize: 30,
+        fontWeight: "600",
     },
     text: {
-        color: "#ffffff",
-        fontSize: 22,
-        textAlign: "left",
+        color: "#ffffffaa",
+        fontSize: 30,
+        fontWeight: "600",
     },
 });
