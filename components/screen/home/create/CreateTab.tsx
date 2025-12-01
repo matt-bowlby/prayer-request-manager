@@ -26,13 +26,7 @@ export default function CreateTab({
 
     const inputRef = React.useRef<TextInput>(null);
 
-    const setType = usePrayerCreateStore((state) => state.setType);
-    const setRecipient = usePrayerCreateStore((state) => state.setRecipient);
-    const setBody = usePrayerCreateStore((state) => state.setBody);
-    const type = usePrayerCreateStore((state) => state.type);
-    const recipient = usePrayerCreateStore((state) => state.recipient);
-    const body = usePrayerCreateStore((state) => state.body);
-    const reset = usePrayerCreateStore((state) => state.reset);
+    const { setType, setRecipient, setBody, type, recipient, body, reset } = usePrayerCreateStore();
 
     return (
         <KeyboardAvoidingView
@@ -41,14 +35,20 @@ export default function CreateTab({
             }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-            <Pressable
-                style={{ flex: 1, alignItems: "center" }}
-                onPress={Keyboard.dismiss}
-            >
+            <Pressable style={{ flex: 1, alignItems: "center" }} onPress={Keyboard.dismiss}>
                 <View style={{ width: "100%", alignItems: "flex-start" }}>
                     <Text style={styles.title}>{title}</Text>
                 </View>
-                <View style={{ flex: 1, width: "100%", gap: 20, justifyContent: "center", borderWidth: 1, marginBottom: 100 }}>
+
+                <View
+                    style={{
+                        marginTop: 150,
+                        flex: 1,
+                        width: "100%",
+                        gap: 20,
+                        justifyContent: "center",
+                    }}
+                >
                     <View>
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Text style={styles.label}>Lord, I </Text>
@@ -61,8 +61,7 @@ export default function CreateTab({
                                     Keyboard.dismiss();
                                 }}
                                 onClose={() => {}}
-                                defaultOption={"pray"}
-                                minWidth={100}
+                                defaultOption={type}
                             />
                             {(type === "thank" || type === "praise") && (
                                 <Text style={styles.label}>you</Text>
@@ -90,12 +89,22 @@ export default function CreateTab({
                             <Text style={styles.label}>:</Text>
                         </View>
                     </View>
-                    <ScrollView style={{ overflow: "scroll", outlineWidth: 1 }}>
+                    <ScrollView
+                        style={{ overflow: "scroll", height: "100%" }}
+                        contentContainerStyle={{ flexGrow: 1 }}
+                    >
                         <TextInput
                             value={body}
                             ref={inputRef}
                             onChangeText={setBody}
-                            style={[styles.input, { borderBottomWidth: 0 }]}
+                            style={[
+                                styles.input,
+                                {
+                                    borderBottomWidth: 0,
+                                    flex: 1,
+                                },
+                            ]}
+                            scrollEnabled={false}
                             placeholder="Enter prayer"
                             placeholderTextColor="#ffffff88"
                             multiline
@@ -103,7 +112,7 @@ export default function CreateTab({
                         />
                     </ScrollView>
                 </View>
-                <View style={{ width: "100%", alignItems: "center", position: "absolute", bottom: 0 }}>
+                <View style={{ width: "100%", alignItems: "center" }}>
                     <Button
                         disabled={recipient.length === 0 || body.length === 0}
                         disabledStyleProps={{ opacity: 0.5 }}
