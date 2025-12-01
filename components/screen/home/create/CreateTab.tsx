@@ -1,4 +1,5 @@
 import {
+    Animated,
     View,
     Text,
     Pressable,
@@ -27,6 +28,17 @@ export default function CreateTab({
     const inputRef = React.useRef<TextInput>(null);
 
     const { setType, setRecipient, setBody, type, recipient, body, reset } = usePrayerCreateStore();
+
+    // animated opacity for fading out parts of the form when dropdown opens
+    const fadeAnim = React.useRef(new Animated.Value(1)).current;
+
+    const fadeTo = (toValue: number) => {
+        Animated.timing(fadeAnim, {
+            toValue,
+            duration: 200,
+            useNativeDriver: true,
+        }).start();
+    };
 
     return (
         <KeyboardAvoidingView
@@ -59,19 +71,23 @@ export default function CreateTab({
                                 }}
                                 onOpen={() => {
                                     Keyboard.dismiss();
+                                    fadeTo(0.0);
                                 }}
-                                onClose={() => {}}
+                                onClose={() => {
+                                    fadeTo(1);
+                                }}
                                 defaultOption={type}
                             />
                             {(type === "thank" || type === "praise") && (
                                 <Text style={styles.label}>you</Text>
                             )}
                         </View>
-                        <View
+                        <Animated.View
                             style={{
                                 flexDirection: "row",
                                 alignItems: "center",
                                 flexWrap: "wrap",
+                                opacity: fadeAnim,
                             }}
                         >
                             <Text style={styles.label}>On behalf of </Text>
@@ -87,30 +103,32 @@ export default function CreateTab({
                                 />
                             </View>
                             <Text style={styles.label}>:</Text>
-                        </View>
+                        </Animated.View>
                     </View>
-                    <ScrollView
-                        style={{ overflow: "scroll", height: "100%" }}
-                        contentContainerStyle={{ flexGrow: 1 }}
-                    >
-                        <TextInput
-                            value={body}
-                            ref={inputRef}
-                            onChangeText={setBody}
-                            style={[
-                                styles.input,
-                                {
-                                    borderBottomWidth: 0,
-                                    flex: 1,
-                                },
-                            ]}
-                            scrollEnabled={false}
-                            placeholder="Enter prayer"
-                            placeholderTextColor="#ffffff88"
-                            multiline
-                            submitBehavior="blurAndSubmit"
-                        />
-                    </ScrollView>
+                    <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
+                        <ScrollView
+                            style={{ overflow: "scroll", height: "100%" }}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                        >
+                            <TextInput
+                                value={body}
+                                ref={inputRef}
+                                onChangeText={setBody}
+                                style={[
+                                    styles.input,
+                                    {
+                                        borderBottomWidth: 0,
+                                        flex: 1,
+                                    },
+                                ]}
+                                scrollEnabled={false}
+                                placeholder="Enter prayer"
+                                placeholderTextColor="#ffffff88"
+                                multiline
+                                submitBehavior="blurAndSubmit"
+                            />
+                        </ScrollView>
+                    </Animated.View>
                 </View>
                 <View style={{ width: "100%", alignItems: "center" }}>
                     <Button

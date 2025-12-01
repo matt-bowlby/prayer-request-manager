@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
         fontFamily: "Archivo",
         fontSize: 30,
         fontWeight: "600",
-        color: "#000",
+        color: "#fff",
     },
     visibleTextContainer: {
         position: "absolute",
@@ -143,9 +143,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         borderRadius: 16,
-        padding: 10,
-        gap: 10,
-        backgroundColor: "#fff",
+        gap: 10
     },
     optionItem: {
         paddingVertical: 5,
