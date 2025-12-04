@@ -44,7 +44,7 @@ async function initDB(): Promise<void> {
     // I'll just update the CREATE statement.
     await database.execAsync(`
         CREATE TABLE IF NOT EXISTS user_prayers (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             type TEXT NOT NULL,
             recipient TEXT NOT NULL,
             body TEXT NOT NULL,
@@ -117,7 +117,7 @@ async function processPendingTransactions(): Promise<void> {
                 const attempts = (row.attempts ?? 0) + 1;
                 const database = await ensureDB();
                 await database.runAsync(
-                    `UPDATE transactions SET attempts = ?, last_error = ?, updated_at = ? WHERE id = ?`,
+                    `UPDATE transactions SET attempts = ?, last_error = ?, date_updated = ? WHERE id = ?`,
                     attempts,
                     String(err?.message ?? err),
                     new Date().toISOString(),
@@ -190,7 +190,7 @@ function editPrayer(prayerID: number, updatedFields: Partial<Prayer>): Promise<v
 }
 
 function deletePrayer(prayerID: number): Promise<void> {
-    const sql = `DELETE FROM user_prayers WHERE id = ?`;
+    const sql = `UPDATE user_prayers SET deleted = 1 WHERE id = ?`;
     return enqueueCommand({ sql, params: [prayerID] });
 }
 

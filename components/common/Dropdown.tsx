@@ -114,8 +114,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottomWidth: 1,
-        borderBottomColor: "#ffffff",
         paddingVertical: 5,
         gap: 5,
     },
@@ -125,6 +123,7 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight: "600",
         color: "#fff",
+        textDecorationLine: "underline",
     },
     textOption: {
         fontFamily: "Archivo",

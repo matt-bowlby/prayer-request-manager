@@ -21,12 +21,11 @@ export const usePrayerStore = create<PrayerStore>((set, get) => ({
         });
         set((_) => {
             return { prayers: prayers };
-         });
+        });
     },
     addPrayer: (prayer: Prayer) => {
         set((state) => {
             // Add new prayer to start of prayer list
-            prayer.id = state.prayers.length;
             state.prayers.unshift(prayer);
             return { prayers: state.prayers };
         });

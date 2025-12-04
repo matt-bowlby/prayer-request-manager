@@ -15,6 +15,7 @@ import { Keyboard } from "react-native";
 import Dropdown from "../../../common/Dropdown";
 import { usePrayerCreateStore } from "./PrayerCreateStore";
 import React from "react";
+import { addPrayer as addPrayerToDatabase } from "../../../../storage/database";
 
 export default function CreateTab({
     title = "New Prayer",
@@ -35,101 +36,109 @@ export default function CreateTab({
     const fadeTo = (toValue: number) => {
         Animated.timing(fadeAnim, {
             toValue,
-            duration: 200,
+            duration: 100,
             useNativeDriver: true,
         }).start();
     };
 
     return (
-        <KeyboardAvoidingView
+        <View
             style={{
                 flex: 1,
             }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-            <Pressable style={{ flex: 1, alignItems: "center" }} onPress={Keyboard.dismiss}>
-                <View style={{ width: "100%", alignItems: "flex-start" }}>
-                    <Text style={styles.title}>{title}</Text>
-                </View>
-
-                <View
-                    style={{
-                        marginTop: 150,
-                        flex: 1,
-                        width: "100%",
-                        gap: 20,
-                        justifyContent: "center",
-                    }}
-                >
-                    <View>
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <Text style={styles.label}>Lord, I </Text>
-                            <Dropdown
-                                options={["pray", "ask", "praise", "thank", "confess", "lament"]}
-                                onSelect={(option) => {
-                                    setType(option as PrayerType);
-                                }}
-                                onOpen={() => {
-                                    Keyboard.dismiss();
-                                    fadeTo(0.0);
-                                }}
-                                onClose={() => {
-                                    fadeTo(1);
-                                }}
-                                defaultOption={type}
-                            />
-                            {(type === "thank" || type === "praise") && (
-                                <Text style={styles.label}>you</Text>
-                            )}
-                        </View>
-                        <Animated.View
-                            style={{
-                                flexDirection: "row",
-                                alignItems: "center",
-                                flexWrap: "wrap",
-                                opacity: fadeAnim,
-                            }}
-                        >
-                            <Text style={styles.label}>On behalf of </Text>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+                <Pressable style={{ flex: 1, alignItems: "center" }} onPress={Keyboard.dismiss}>
+                    <View style={{ width: "100%", alignItems: "flex-start" }}>
+                        <Text style={styles.title}>{title}</Text>
+                    </View>
+                    <View
+                        style={{
+                            marginTop: 150,
+                            flex: 1,
+                            width: "100%",
+                            gap: 20,
+                            justifyContent: "center",
+                        }}
+                    >
+                        <View style={{ gap: 20 }}>
                             <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <Text style={styles.text}>Lord, I </Text>
+                                <Dropdown
+                                    options={[
+                                        "pray",
+                                        "ask",
+                                        "praise",
+                                        "thank",
+                                        "confess",
+                                        "lament",
+                                    ]}
+                                    onSelect={(option) => {
+                                        setType(option as PrayerType);
+                                    }}
+                                    onOpen={() => {
+                                        Keyboard.dismiss();
+                                        fadeTo(0.0);
+                                    }}
+                                    onClose={() => {
+                                        fadeTo(1);
+                                    }}
+                                    defaultOption={type}
+                                />
+                                {(type === "thank" || type === "praise") && (
+                                    <Text style={styles.text}> you</Text>
+                                )}
+                            </View>
+                            <Animated.View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    flexWrap: "wrap",
+                                    opacity: fadeAnim,
+                                }}
+                            >
+                                <Text style={styles.text}>On behalf of </Text>
+                                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                    <TextInput
+                                        value={recipient}
+                                        onChangeText={setRecipient}
+                                        style={[styles.text, { textDecorationLine: "underline" }]}
+                                        placeholder="Name"
+                                        placeholderTextColor="#ffffff88"
+                                    />
+                                    <Text style={styles.text}>:</Text>
+                                </View>
+                            </Animated.View>
+                        </View>
+                        <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
+                            <ScrollView
+                                style={{ overflow: "scroll", height: "100%" }}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                            >
                                 <TextInput
-                                    value={recipient}
-                                    onChangeText={setRecipient}
-                                    style={styles.input}
-                                    placeholder="Name"
+                                    value={body}
+                                    ref={inputRef}
+                                    onChangeText={setBody}
+                                    style={[
+                                        styles.text,
+                                        {
+                                            borderBottomWidth: 0,
+                                            flex: 1,
+                                        },
+                                    ]}
+                                    scrollEnabled={false}
+                                    placeholder="Enter prayer..."
                                     placeholderTextColor="#ffffff88"
                                     multiline
                                     submitBehavior="blurAndSubmit"
                                 />
-                            </View>
-                            <Text style={styles.label}>:</Text>
+                            </ScrollView>
                         </Animated.View>
                     </View>
-                    <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
-                        <ScrollView
-                            style={{ overflow: "scroll", height: "100%" }}
-                            contentContainerStyle={{ flexGrow: 1 }}
-                        >
-                            <TextInput
-                                value={body}
-                                ref={inputRef}
-                                onChangeText={setBody}
-                                style={[
-                                    styles.input,
-                                    {
-                                        borderBottomWidth: 0,
-                                        flex: 1,
-                                    },
-                                ]}
-                                scrollEnabled={false}
-                                placeholder="Enter prayer"
-                                placeholderTextColor="#ffffff88"
-                                multiline
-                                submitBehavior="blurAndSubmit"
-                            />
-                        </ScrollView>
-                    </Animated.View>
-                </View>
+                </Pressable>
                 <View style={{ width: "100%", alignItems: "center" }}>
                     <Button
                         disabled={recipient.length === 0 || body.length === 0}
@@ -144,7 +153,7 @@ export default function CreateTab({
                         }}
                         onPress={() => {
                             if (recipient.length === 0 || body.length === 0) return;
-                            addPrayer({
+                            const prayer: Prayer = {
                                 id: 0,
                                 type: type,
                                 recipient: recipient,
@@ -153,7 +162,11 @@ export default function CreateTab({
                                 updatedAt: new Date().toISOString(),
                                 seen: false,
                                 deleted: false,
-                            });
+                            };
+                            addPrayerToDatabase(prayer);
+                            
+                            addPrayer(prayer);
+
                             onSubmit?.();
                             reset();
                         }}
@@ -163,8 +176,8 @@ export default function CreateTab({
                         </Text>
                     </Button>
                 </View>
-            </Pressable>
-        </KeyboardAvoidingView>
+            </KeyboardAvoidingView>
+        </View>
     );
 }
 
@@ -174,18 +187,16 @@ const styles = StyleSheet.create({
         fontSize: 40,
         color: "#ffffff",
     },
-    label: {
-        fontFamily: "Archivo",
-        fontWeight: "600",
-        fontSize: 30,
-        color: "#ffffffaa",
-    },
-    input: {
+    text: {
         fontFamily: "Archivo",
         fontWeight: "600",
         fontSize: 30,
         color: "#ffffff",
-        borderBottomWidth: 1,
-        borderBottomColor: "#ffffff",
+    },
+    textHighlight: {
+        fontFamily: "Archivo",
+        fontWeight: "600",
+        fontSize: 30,
+        color: "#ffffff",
     },
 });
