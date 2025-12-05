@@ -18,23 +18,18 @@ const COLUMNS = [
     "deleted",
 ];
 
-// Transactions queue table (persistent)
-async function initTransactionsTable(): Promise<void> {
+export async function debugDump(): Promise<{ schema: any[]; rows: any[] }> {
     const database = await ensureDB();
-    return database.execAsync(`
-        CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            command TEXT NOT NULL,
-            attempts INTEGER NOT NULL DEFAULT 0,
-            last_error TEXT
-        );
-    `);
+    const schemaRes: any = await database.getAllAsync(`PRAGMA table_info(user_prayers);`);
+    const rowsRes: any = await database.getAllAsync(
+        `SELECT * FROM user_prayers ORDER BY date_created DESC;`
+    );
+    console.log("user_prayers schema:", schemaRes || []);
+    console.log("user_prayers rows:", rowsRes || []);
+    return { schema: schemaRes || [], rows: rowsRes || [] };
 }
 
 async function initDB(): Promise<void> {
-    // ensure transactions table exists and start worker
-    await initTransactionsTable();
-
     const database = await ensureDB();
     // Drop old table if it exists to ensure schema update (Development only, ideally migration)
     // For now, we will just create if not exists, but since schema changed, we might have issues if table exists.
@@ -54,114 +49,27 @@ async function initDB(): Promise<void> {
             deleted INTEGER NOT NULL DEFAULT 0
         );
     `);
-
-    // kick off queue worker to resume any pending commands
-    startQueueWorker();
 }
 
-type CommandObj = { sql: string; params?: any[] };
+async function addPrayer(prayer: Prayer): Promise<number> {
+    const { type, recipient, body, createdAt, updatedAt } = prayer;
 
-async function enqueueCommand(commandObj: CommandObj): Promise<void> {
-    const commandText = JSON.stringify(commandObj);
     const database = await ensureDB();
-    await database.runAsync(
-        `INSERT INTO transactions (command, attempts) VALUES (?, 0)`,
-        commandText
-    );
+    let lastID = 0;
+    await database.withTransactionAsync(async () => {
+        const res: any = await database.runAsync(
+            `
+        INSERT INTO user_prayers (type, recipient, body, date_created, date_updated, seen, deleted)
+        VALUES (?, ?, ?, ?, ?, 0, 0);
+    `,
+            [type, recipient, body, createdAt, updatedAt]
+        );
+        lastID = await res.lastInsertRowId;
+    });
+    return lastID;
 }
 
-async function getPendingTransactions(): Promise<
-    { id: number; command: string; attempts: number }[]
-> {
-    const database = await ensureDB();
-    const res: any = await database.getAllAsync(
-        `SELECT id, command, attempts FROM transactions ORDER BY id ASC;`
-    );
-    return res || [];
-}
-
-const MAX_RETRIES = 5;
-let _queueWorkerRunning = false;
-
-async function processPendingTransactions(): Promise<void> {
-    if (_queueWorkerRunning) return;
-    _queueWorkerRunning = true;
-    try {
-        const pending = await getPendingTransactions();
-        for (const row of pending) {
-            const id = row.id;
-            let cmdObj: CommandObj | null = null;
-            try {
-                cmdObj = JSON.parse(row.command);
-            } catch (err) {
-                const database = await ensureDB();
-                await database.runAsync(
-                    `UPDATE transactions SET attempts = attempts + 1, last_error = ? WHERE id = ?`,
-                    `invalid-json:${String(err)}`,
-                    id
-                );
-                continue;
-            }
-
-            try {
-                const database = await ensureDB();
-                await database.withTransactionAsync(async () => {
-                    const params = cmdObj?.params ?? [];
-                    if (cmdObj) await database.runAsync(cmdObj.sql, ...params);
-                });
-
-                // success -> remove from queue
-                const database2 = await ensureDB();
-                await database2.runAsync(`DELETE FROM transactions WHERE id = ?`, id);
-            } catch (err: any) {
-                const attempts = (row.attempts ?? 0) + 1;
-                const database = await ensureDB();
-                await database.runAsync(
-                    `UPDATE transactions SET attempts = ?, last_error = ?, date_updated = ? WHERE id = ?`,
-                    attempts,
-                    String(err?.message ?? err),
-                    new Date().toISOString(),
-                    id
-                );
-                if (attempts >= MAX_RETRIES) {
-                    // optional dead-letter handling
-                }
-            }
-        }
-    } finally {
-        _queueWorkerRunning = false;
-    }
-}
-
-let _queueIntervalHandle: any = null;
-function startQueueWorker(intervalMs = 500) {
-    processPendingTransactions().catch(() => {});
-    if (_queueIntervalHandle != null) clearInterval(_queueIntervalHandle);
-    _queueIntervalHandle = setInterval(() => {
-        processPendingTransactions().catch(() => {});
-    }, intervalMs);
-}
-
-function stopQueueWorker() {
-    if (_queueIntervalHandle != null) {
-        clearInterval(_queueIntervalHandle);
-        _queueIntervalHandle = null;
-    }
-}
-
-function addPrayer(prayer: Prayer): Promise<void> {
-    const { id, type, recipient, body, createdAt, updatedAt } = prayer;
-
-    const sql = `
-        INSERT INTO user_prayers (id, type, recipient, body, date_created, date_updated, seen, deleted)
-        VALUES (?, ?, ?, ?, ?, ?, 0, 0);
-    `;
-    const params = [id, type, recipient, body, createdAt, updatedAt];
-
-    return enqueueCommand({ sql, params });
-}
-
-function editPrayer(prayerID: number, updatedFields: Partial<Prayer>): Promise<void> {
+async function editPrayer(prayerID: number, updatedFields: Partial<Prayer>): Promise<void> {
     const fields: string[] = [];
     const values: any[] = [];
     for (const [key, value] of Object.entries(updatedFields)) {
@@ -179,19 +87,31 @@ function editPrayer(prayerID: number, updatedFields: Partial<Prayer>): Promise<v
         return Promise.resolve(); // Nothing to update
     }
 
-    const sql = `
+    const database = await ensureDB();
+    await database.withTransactionAsync(async () => {
+        await database.runAsync(
+            `
         UPDATE user_prayers
         SET ${fields.join(", ")}
         WHERE id = ?
-    `;
-    const params = [...values, prayerID];
-
-    return enqueueCommand({ sql, params });
+    `,
+            [...values, prayerID]
+        );
+    });
 }
 
-function deletePrayer(prayerID: number): Promise<void> {
-    const sql = `UPDATE user_prayers SET deleted = 1 WHERE id = ?`;
-    return enqueueCommand({ sql, params: [prayerID] });
+async function deletePrayer(prayerID: number): Promise<void> {
+    const database = await ensureDB();
+    await database.withTransactionAsync(async () => {
+        await database.runAsync(
+            `
+        UPDATE user_prayers
+        SET deleted = 1
+        WHERE id = ?
+    `,
+            [prayerID]
+        );
+    });
 }
 
 async function getPrayers(): Promise<Prayer[]> {
@@ -224,12 +144,4 @@ async function getPrayers(): Promise<Prayer[]> {
     }
 }
 
-export {
-    initDB,
-    addPrayer,
-    editPrayer,
-    getPrayers,
-    deletePrayer,
-    startQueueWorker,
-    stopQueueWorker,
-};
+export { initDB, addPrayer, editPrayer, getPrayers, deletePrayer };

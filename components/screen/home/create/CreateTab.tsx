@@ -10,12 +10,11 @@ import {
 } from "react-native";
 import { StyleSheet } from "react-native";
 import Button from "../../../common/Button";
-import { usePrayerStore } from "../../../../stores/PrayerStore";
 import { Keyboard } from "react-native";
 import Dropdown from "../../../common/Dropdown";
 import { usePrayerCreateStore } from "./PrayerCreateStore";
 import React from "react";
-import { addPrayer as addPrayerToDatabase } from "../../../../storage/database";
+import useAddPrayer from "../../../../hooks/database_hooks/useAddPrayer";
 
 export default function CreateTab({
     title = "New Prayer",
@@ -24,8 +23,7 @@ export default function CreateTab({
     title?: string;
     onSubmit?: () => void;
 }) {
-    const addPrayer = usePrayerStore((state) => state.addPrayer);
-
+    const addPrayer = useAddPrayer();
     const inputRef = React.useRef<TextInput>(null);
 
     const { setType, setRecipient, setBody, type, recipient, body, reset } = usePrayerCreateStore();
@@ -39,6 +37,23 @@ export default function CreateTab({
             duration: 100,
             useNativeDriver: true,
         }).start();
+    };
+
+    const handleCreate = () => {
+        if (recipient.length === 0 || body.length === 0) return;
+        const prayer: Prayer = {
+            id: 0,
+            type: type,
+            recipient: recipient,
+            body: body,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            seen: false,
+            deleted: false,
+        };
+        addPrayer.mutate(prayer);
+        onSubmit?.();
+        reset();
     };
 
     return (
@@ -151,25 +166,7 @@ export default function CreateTab({
                             justifyContent: "center",
                             alignItems: "center",
                         }}
-                        onPress={() => {
-                            if (recipient.length === 0 || body.length === 0) return;
-                            const prayer: Prayer = {
-                                id: 0,
-                                type: type,
-                                recipient: recipient,
-                                body: body,
-                                createdAt: new Date().toISOString(),
-                                updatedAt: new Date().toISOString(),
-                                seen: false,
-                                deleted: false,
-                            };
-                            addPrayerToDatabase(prayer);
-                            
-                            addPrayer(prayer);
-
-                            onSubmit?.();
-                            reset();
-                        }}
+                        onPress={() => handleCreate()}
                     >
                         <Text style={{ fontFamily: "Archivo", fontWeight: "900", fontSize: 25 }}>
                             Create

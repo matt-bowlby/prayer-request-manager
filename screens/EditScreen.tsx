@@ -11,18 +11,18 @@ import {
 } from "react-native";
 import { StyleSheet } from "react-native";
 import Button from "../components/common/Button";
-import { usePrayerStore } from "../stores/PrayerStore";
 import { Keyboard } from "react-native";
 import Dropdown from "../components/common/Dropdown";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import X from "../components/common/icons/X";
 import Trash from "../components/common/icons/Trash";
-import { deletePrayer } from "../storage/database";
-import { editPrayer } from "../storage/database";
+import useEditPrayer from "../hooks/database_hooks/useEditPrayer";
+import useDeletePrayer from "../hooks/database_hooks/useDeletePrayer";
 
 export default function EditScreen({ navigation, route }: { navigation: any; route: any }) {
-    const { editPrayer, removePrayer } = usePrayerStore();
+    const editPrayer = useEditPrayer();
+    const deletePrayer = useDeletePrayer();
     const prayer = route.params?.info;
 
     const [type, setType] = useState<PrayerType>(prayer?.type || "pray");
@@ -44,14 +44,7 @@ export default function EditScreen({ navigation, route }: { navigation: any; rou
 
     const handleSave = () => {
         if (recipient.length === 0 || body.length === 0) return;
-
-        editPrayer(prayer.id, {
-            type,
-            recipient,
-            body,
-            updatedAt: new Date().toISOString(),
-        });
-
+        editPrayer.mutate({ id: prayer.id, updatedFields: { type, recipient, body } });
         navigation.goBack();
     };
 
@@ -70,8 +63,7 @@ export default function EditScreen({ navigation, route }: { navigation: any; rou
                 style: "destructive",
                 onPress: () => {
                     if (prayer?.id !== undefined) {
-                        removePrayer(prayer.id);
-                        deletePrayer(prayer.id);
+                        deletePrayer.mutate(prayer.id);
                         navigation.goBack();
                     }
                 },

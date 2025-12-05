@@ -15,14 +15,13 @@ import EditScreen from "./screens/EditScreen";
 import FirstCreateScreen from "./screens/FirstCreateScreen";
 import HomeScreen from "./screens/HomeScreen";
 import * as SplashScreen from "expo-splash-screen";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { initDB } from "./storage/database";
 
-import { usePrayerStore } from "./stores/PrayerStore";
-
 const Stack = createNativeStackNavigator();
-
 SplashScreen.preventAutoHideAsync();
+const queryClient = new QueryClient();
 
 export default function App() {
     const [fontsLoaded] = useFonts({
@@ -40,7 +39,6 @@ export default function App() {
         async function fetchData() {
             try {
                 await initDB();
-                await usePrayerStore.getState().getPrayers();
             } catch (err) {
                 console.error("startup failure:", err);
             } finally {
@@ -67,32 +65,32 @@ export default function App() {
     if (!fontsLoaded || !appReady) return null;
 
     return (
-        <SafeAreaProvider>
-            <View style={styles.container}>
-                <StatusBar style="light" />
-                <Background
-                    onLoadEnd={() => {
-                        setBgLoaded(true);
-                    }}
-                />
-                <NavigationContainer>
-                    <Stack.Navigator
-                        initialRouteName={
-                            usePrayerStore.getState().prayers.length <= 0 ? "Onboard" : "Home"
-                        }
-                        screenOptions={{
-                            headerShown: false,
-                            contentStyle: { backgroundColor: "#00000000" },
+        <QueryClientProvider client={queryClient}>
+            <SafeAreaProvider>
+                <View style={styles.container}>
+                    <StatusBar style="light" />
+                    <Background
+                        onLoadEnd={() => {
+                            setBgLoaded(true);
                         }}
-                    >
-                        <Stack.Screen name="Onboard" component={OnboardScreen} />
-                        <Stack.Screen name="FirstCreate" component={FirstCreateScreen} />
-                        <Stack.Screen name="Home" component={HomeScreen} />
-                        <Stack.Screen name="Edit" component={EditScreen} />
-                    </Stack.Navigator>
-                </NavigationContainer>
-            </View>
-        </SafeAreaProvider>
+                    />
+                    <NavigationContainer>
+                        <Stack.Navigator
+                            initialRouteName={"Home"}
+                            screenOptions={{
+                                headerShown: false,
+                                contentStyle: { backgroundColor: "#00000000" },
+                            }}
+                        >
+                            <Stack.Screen name="Onboard" component={OnboardScreen} />
+                            <Stack.Screen name="FirstCreate" component={FirstCreateScreen} />
+                            <Stack.Screen name="Home" component={HomeScreen} />
+                            <Stack.Screen name="Edit" component={EditScreen} />
+                        </Stack.Navigator>
+                    </NavigationContainer>
+                </View>
+            </SafeAreaProvider>
+        </QueryClientProvider>
     );
 }
 

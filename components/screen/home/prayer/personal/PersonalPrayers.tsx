@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import Prayer from "../Prayer";
-import { usePrayerStore } from "../../../../../stores/PrayerStore";
 import { create } from "zustand";
+import usePrayers from "../../../../../hooks/database_hooks/usePrayers";
 
 interface HeightStore {
     height: number;
@@ -14,7 +14,7 @@ const useHeightStore = create<HeightStore>((set) => ({
 }));
 
 export default function PersonalPrayers({ navigation }: { navigation?: any }) {
-    const prayers = usePrayerStore((state) => state.prayers);
+    const getPrayers = usePrayers();
     const { height, setHeight } = useHeightStore();
 
     return (
@@ -23,7 +23,7 @@ export default function PersonalPrayers({ navigation }: { navigation?: any }) {
                 onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
                 style={{ flex: 1, width: "100%", gap: 10 }}
             >
-                {prayers.length === 0 ? (
+                {getPrayers.data?.length === 0 ? (
                     <View
                         style={{
                             flex: 1,
@@ -31,8 +31,16 @@ export default function PersonalPrayers({ navigation }: { navigation?: any }) {
                             alignItems: "flex-start",
                         }}
                     >
-                        <Text style={{ fontFamily: "Archivo", fontWeight: "600", fontSize: 30, color: "#ffffff" }}>
-                            Press the <Text style={{ textDecorationLine: "underline" }}>plus</Text> button to add a prayer!
+                        <Text
+                            style={{
+                                fontFamily: "Archivo",
+                                fontWeight: "600",
+                                fontSize: 30,
+                                color: "#ffffff",
+                            }}
+                        >
+                            Press the <Text style={{ textDecorationLine: "underline" }}>plus</Text>{" "}
+                            button to add a prayer!
                         </Text>
                     </View>
                 ) : (
@@ -44,7 +52,7 @@ export default function PersonalPrayers({ navigation }: { navigation?: any }) {
                             offset: height * index,
                             index,
                         })}
-                        data={prayers}
+                        data={getPrayers.data}
                         renderItem={({ item }) => (
                             <View
                                 style={{
