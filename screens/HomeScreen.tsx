@@ -4,6 +4,7 @@ import PrayerTab from "../components/screen/home/prayer/PrayerTab";
 import NavigationBar from "../components/common/NavigationBar";
 import { useHomeStore } from "../stores/HomeStore";
 import CreateTab from "../components/screen/home/create/CreateTab";
+import SettingsTab from "../components/screen/home/settings/SettingsTab";
 
 export default function HomeScreen({ navigation }: any) {
     const homeMode = useHomeStore((state) => state.homeMode);
@@ -23,8 +24,7 @@ export default function HomeScreen({ navigation }: any) {
                 <View style={{ flex: 1, width: "100%" }}>
                     {
                         homeMode === "Settings" ? (
-                            // <SettingsTab />
-                            <View />
+                            <SettingsTab />
                         ) : homeMode === "Create" ? (
                             <View style={{ flex: 1, marginBottom: 20 }}>
                                 <CreateTab onSubmit={() => {
