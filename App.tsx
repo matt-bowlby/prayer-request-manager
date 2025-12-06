@@ -16,6 +16,7 @@ import FirstCreateScreen from "./screens/FirstCreateScreen";
 import HomeScreen from "./screens/HomeScreen";
 import * as SplashScreen from "expo-splash-screen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { getAppData } from "./storage/database";
 
 import { initDB } from "./storage/database";
 
@@ -33,12 +34,15 @@ export default function App() {
     });
     const [appReady, setAppReady] = React.useState(false);
     const [bgLoaded, setBgLoaded] = React.useState(false);
+    const [onboardingComplete, setOnboardingComplete] = React.useState(false);
 
     React.useEffect(() => {
         let mounted = true;
         async function fetchData() {
             try {
                 await initDB();
+                const appData = await getAppData();
+                setOnboardingComplete(appData.onboardingComplete);
             } catch (err) {
                 console.error("startup failure:", err);
             } finally {
@@ -76,7 +80,7 @@ export default function App() {
                     />
                     <NavigationContainer>
                         <Stack.Navigator
-                            initialRouteName={"Home"}
+                            initialRouteName={onboardingComplete ? "Home" : "Onboard"}
                             screenOptions={{
                                 headerShown: false,
                                 contentStyle: { backgroundColor: "#00000000" },

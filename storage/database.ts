@@ -1,4 +1,5 @@
 import { openDatabaseAsync, SQLiteDatabase } from "expo-sqlite";
+import { DEFAULT_SETTINGS, DEFAULT_APP_DATA } from "../constants";
 
 let db: SQLiteDatabase | null = null;
 async function ensureDB(): Promise<SQLiteDatabase> {
@@ -31,12 +32,6 @@ export async function debugDump(): Promise<{ schema: any[]; rows: any[] }> {
 
 async function initDB(): Promise<void> {
     const database = await ensureDB();
-    // Drop old table if it exists to ensure schema update (Development only, ideally migration)
-    // For now, we will just create if not exists, but since schema changed, we might have issues if table exists.
-    // I will assume we can drop it or the user will clear data.
-    // To be safe for this task, I'll try to alter or just use a new table name if I could, but I'll stick to user_prayers.
-    // I'll add a check to drop it if it has the old schema, but that's complex.
-    // I'll just update the CREATE statement.
     await database.execAsync(`
         CREATE TABLE IF NOT EXISTS user_prayers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,6 +44,93 @@ async function initDB(): Promise<void> {
             deleted INTEGER NOT NULL DEFAULT 0
         );
     `);
+
+    await database.execAsync(`
+        CREATE TABLE IF NOT EXISTS app_data (
+            user_id INTEGER PRIMARY KEY,
+            settings TEXT,
+            app_data TEXT
+        )
+    `);
+
+    interface CountResult {
+        count: number;
+    }
+
+    // Ensure there is at least one row in app_data
+    await database.withTransactionAsync(async () => {
+        const existing = await database.getAllAsync<CountResult>(
+            `SELECT COUNT(*) as count FROM app_data WHERE user_id = 1`
+        );
+        if (existing[0].count === 0) {
+            await database.runAsync(
+                `INSERT INTO app_data (user_id, settings, app_data) VALUES (1, ?, ?)`,
+                [JSON.stringify(DEFAULT_SETTINGS), JSON.stringify(DEFAULT_APP_DATA)]
+            );
+        }
+    });
+}
+
+async function getSettings(): Promise<Settings> {
+    const database = await ensureDB();
+    let res: any = null;
+    await database.withTransactionAsync(async () => {
+        res = await database.getFirstAsync(`
+            SELECT settings FROM app_data WHERE user_id = 1
+        `);
+    });
+
+    const settings = res && res.settings ? (JSON.parse(res.settings) as Settings) : null;
+
+    return settings || DEFAULT_SETTINGS;
+}
+
+async function getAppData(): Promise<AppData> {
+    const database = await ensureDB();
+    let res: any = null;
+    await database.withTransactionAsync(async () => {
+        res = await database.getFirstAsync(`
+            SELECT app_data FROM app_data WHERE user_id = 1
+        `);
+    });
+
+    const appData = res && res.app_data ? (JSON.parse(res.app_data) as AppData) : null;
+
+    return appData || DEFAULT_APP_DATA;
+}
+
+async function setAppData(updatedFields: Partial<AppData>): Promise<void> {
+    let newAppData = await getAppData();
+    newAppData = { ...newAppData, ...updatedFields };
+
+    const database = await ensureDB();
+    await database.withTransactionAsync(async () => {
+        database.runAsync(
+            `
+            UPDATE app_data
+            SET app_data = ?
+            WHERE user_id = 1
+        `,
+            [JSON.stringify(newAppData)]
+        );
+    });
+}
+
+async function setSettings(updatedFields: Partial<Settings>): Promise<void> {
+    let newSettings = await getAppData();
+    newSettings = { ...newSettings, ...updatedFields };
+
+    const database = await ensureDB();
+    await database.withTransactionAsync(async () => {
+        database.runAsync(
+            `
+            UPDATE app_data
+            SET app_data = ?
+            WHERE user_id = 1
+        `,
+            [JSON.stringify(newSettings)]
+        );
+    });
 }
 
 async function addPrayer(prayer: Prayer): Promise<number> {
@@ -144,4 +226,14 @@ async function getPrayers(): Promise<Prayer[]> {
     }
 }
 
-export { initDB, addPrayer, editPrayer, getPrayers, deletePrayer };
+export {
+    initDB,
+    addPrayer,
+    editPrayer,
+    getPrayers,
+    deletePrayer,
+    getSettings,
+    getAppData,
+    setAppData,
+    setSettings,
+};

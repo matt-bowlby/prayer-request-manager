@@ -10,3 +10,11 @@ interface Prayer {
     seen: boolean;
     deleted: boolean;
 }
+
+interface Settings {
+    name: string;
+}
+
+interface AppData {
+    onboardingComplete: boolean;
+}

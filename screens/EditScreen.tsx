@@ -80,7 +80,7 @@ export default function EditScreen({ navigation, route }: { navigation: any; rou
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
                 <Pressable style={{ flex: 1, alignItems: "center" }} onPress={Keyboard.dismiss}>
-                    <View style={{ width: "100%", alignItems: "flex-start" }}>
+                    <View style={{ width: "100%", alignItems: "center" }}>
                         <Text style={styles.title}>Edit Prayer</Text>
                     </View>
                     <View

@@ -2,8 +2,11 @@ import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import Button from "../components/common/Button";
+import useSetAppData from "../hooks/database_hooks/useSetAppData";
 
 export default function OnboardScreen({ navigation }: any) {
+    const setAppData = useSetAppData();
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.frame}>
@@ -13,7 +16,10 @@ export default function OnboardScreen({ navigation }: any) {
                 </View>
                 <Button
                     styleProps={styles.button}
-                    onPress={() => navigation.navigate("FirstCreate")}
+                    onPress={() => {
+                        navigation.navigate("FirstCreate");
+                        setAppData.mutate({ onboardingComplete: true });
+                    }}
                 >
                     <Text style={styles.buttonText}>Get Started</Text>
                 </Button>

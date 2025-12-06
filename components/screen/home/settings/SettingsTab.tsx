@@ -42,7 +42,7 @@ export default function SettingsTab() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: "flex-start", alignItems: "center" },
-    header: { width: "100%", alignItems: "center", paddingTop: 12, paddingBottom: 30 },
+    header: { width: "100%", alignItems: "center", paddingBottom: 30 },
     title: { fontFamily: "Archivo", fontSize: 40, color: "#ffffff" },
     list: { width: "100%", paddingHorizontal: 16 },
     listContent: { alignItems: "stretch", paddingBottom: 24 },
